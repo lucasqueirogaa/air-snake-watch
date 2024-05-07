@@ -1,8 +1,14 @@
+from dotenv import load_dotenv
+import os
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.common.keys import Keys
 import time
+
+load_dotenv()
+
+ideal_price = os.getenv("IDEAL_PRICE")
 
 
 async def scrap_site_by_google(selected_web_browser):
@@ -49,14 +55,23 @@ async def scrap_site_by_google(selected_web_browser):
     selected_web_browser.quit()
 
 
-async def scrap_site_by_url(selected_browser):
-    selected_browser.get('https://www.skyscanner.com.br/transporte/passagens-aereas/rec/fln/240930/241006/?adultsv2=2&cabinclass=economy&childrenv2=&inboundaltsenabled=false&outboundaltsenabled=false&preferdirects=false&ref=home&rtn=1')
+async def scrap_123milhas_by_url(selected_browser):
+    print(ideal_price, type(ideal_price))
+    selected_browser.get('https://123milhas.com/v2/busca?de=REC&para=FLN&adultos=2&criancas=0&bebes=0&ida=31-08-2024&volta=04-10-2024&classe=3&is_loyalty=0&search_id=1840551711')
 
-    # recomended_price = WebDriverWait(selected_browser, 120).until(ec.element_to_be_clickable(By.XPATH, '//*[@id="app-root"]/div[1]/div/div[2]/div[2]/div[1]/div[3]/div[1]/button'))
+    print("Iniciando a verificação pelos elementos na página")
 
-    # print(recomended_price)
+    first_result = WebDriverWait(selected_browser, 120).until(ec.presence_of_all_elements_located((By.CLASS_NAME, 'card-header__value')))
 
-    time.sleep(120)
+    for price in first_result[:3]:
+        only_price = price.text.split()[1]
+        is_ideal_price = only_price <= ideal_price
+
+        if is_ideal_price:
+            print(f"Chegou no preço que queremooooos {price}")
+            # Aqui vamos mandar para o CSV, vamos mandar para whatsapp, etc...
+
+    time.sleep(10)
 
     selected_browser.quit()
 
